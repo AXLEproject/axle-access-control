@@ -1,4 +1,4 @@
--- MINI HL7 RIM for purpose of review row level security
+-- MINI HL7 RIM for purpose of review row level security --
 -- no healthcare datatypes
 -- very limited amount of classes
 SET SESSION AUTHORIZATION default;

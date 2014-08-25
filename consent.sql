@@ -118,6 +118,8 @@ EXECUTE 'INSERT INTO Employee (classCode, _player, _scoper, effectiveTime, confi
         RETURNING _id' USING ronan, org1 INTO emp_ronan_r;
 
 
+-- 
+
         -- EXECUTE 'INSERT INTO consent(roleId, action, purposeOfUse, informationReference)
 --         VALUES($1, ''allow'', ''research'', ''diabetes'')' USING pat_mary;
 

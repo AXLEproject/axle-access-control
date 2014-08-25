@@ -5,7 +5,7 @@ DROP ROLE IF EXISTS ronan;
 DROP ROLE IF EXISTS pete;
 DROP ROLE IF EXISTS henry;
 
-/* The users that will access the application */
+/* The users that will access the application. */
 CREATE ROLE ronan;
 CREATE ROLE bob;
 CREATE ROLE sigmund;
