@@ -1,28 +1,13 @@
 -- MINI HL7 RIM for purpose of review row level security
 -- no healthcare datatypes
 -- very limited amount of classes
-
+SET SESSION AUTHORIZATION default;
 DROP SCHEMA IF EXISTS minirim CASCADE;
-
 
 CREATE SCHEMA minirim;
 GRANT USAGE ON SCHEMA  minirim TO public;
 
 SET search_path = minirim;
-
-DROP SEQUENCE IF EXISTS seq CASCADE;
-DROP TABLE IF EXISTS entity CASCADE;
-DROP TABLE IF EXISTS role CASCADE;
-DROP TABLE IF EXISTS act CASCADE;
-DROP TABLE IF EXISTS participation CASCADE;
-DROP TYPE IF EXISTS entityclasscode;
-DROP TYPE IF EXISTS organizationindustrycode;
-DROP TYPE IF EXISTS roleclasscode;
-DROP TYPE IF EXISTS patientvipcode;
-DROP TYPE IF EXISTS actclasscode;
-DROP TYPE IF EXISTS actmoodcode;
-DROP TYPE IF EXISTS confidentialitycode;
-DROP TYPE IF EXISTS participationtype;
 
 CREATE SEQUENCE seq;
 
@@ -46,11 +31,24 @@ CREATE TYPE OrganizationIndustryClass AS ENUM (
        'omhs'  -- offices of mental health specialists
 );
 
+-- http://www.hl7.org/documentcenter/public_temp_E5E731D0-1C23-BA17-0CD938440CF24081/standards/vocabulary/vocabulary_tables/infrastructure/vocabulary/vs_RoleClass.html#RoleClassRoot
 CREATE TYPE RoleClass AS ENUM (
-       'pat',     -- person
-       'emp',     -- employee
-       'aen'      -- assigned entity
+       'pat',          -- person
+       'emp',          -- employee 
+       'assigned',     -- assigned entity
+       'prov',         -- healthcare provider (doctor?)
+       'nurs',         -- nurse
+       'phys'          -- physician
+
 );
+
+-- codesys: HL7v3RoleCode, Oid: 2.16.840.1.113883.5.111 (basically specialization of roleclass, Code Set: Healthcare Provider Role Type )
+CREATE TYPE RoleCode AS ENUM ( 
+       'md',     -- medical doctor
+       'rn'     -- registered nurse
+);
+
+
 CREATE TYPE PatientImportance AS ENUM (
        'bm',     -- board member
        'vip',    -- very important person
@@ -61,30 +59,37 @@ CREATE TYPE ActClass AS ENUM (
        'obs',    -- observation
        'sbadm',  -- substance administration
        'pcpr',   -- care provision
-       'enc'     -- encounter
+       'enc',    -- encounter
+       'cons',    -- consent
+       'act'
 );
 
 CREATE TYPE ActMood AS ENUM (
        'def',    -- definition
        'evn',    -- event
-       'gol',    -- goal
+       'gol',    -- goal 
        'rqo',    -- request or order
        'apt'     -- appointment
 );
 
-CREATE TYPE EmployeeJobClass AS ENUM (
-       'doc',    -- doctor
-       'int',    -- intern doctor
-       'nur',    -- nurse
-       'res',    -- researcher
-       'adm'     -- administration
+
+-- EmployeeJobClass  [2.16.840.1.113883.5.1059]
+CREATE TYPE EmployeeJobClass AS ENUM ( 
+       'ft',     -- Full-time
+       'pt'      -- part-time
 );
 
 CREATE TYPE ParticipationType AS ENUM (
        'prf',    -- performer
-       'rcv',     -- receiver (patient about which the record is about)
-       'ent',     -- enterer
-       'la'       -- legal authenticator
+       'rcv',    -- receiver (patient about which the record is about)
+       'ent',    -- enterer
+       'la',     -- legal authenticator
+       'cst',    -- custodian (Entity in charge of maintaining the information of this act)
+       'aut',    -- One who initiates the control act event, either as its author or its physical performer.
+       'rct',     -- record target
+       'ircp',    -- information recipient
+       'atnd'     -- The practitioner that has responsibility for overseeing a patient's care during a patient encounter. (participation as assigned entity)
+
 );
 
 CREATE TYPE Confidentiality AS ENUM (
@@ -93,6 +98,21 @@ CREATE TYPE Confidentiality AS ENUM (
        'v'     -- very restricted
 );
 
+CREATE TYPE ActRelationshipType AS ENUM (
+      'comp', -- component
+      'auth', -- authorize
+      'apnd'  -- append
+);
+
+CREATE TYPE ActStatus AS ENUM (
+       'active',     
+       'completed',  
+       'new',     
+       'cancelled',
+       'aborted',
+       'suspended',
+       'held'
+);
 
 CREATE TABLE Entity (
        _id        int PRIMARY KEY DEFAULT nextval('seq'),
@@ -104,15 +124,17 @@ CREATE TABLE Organization (standardIndustryClassCode OrganizationIndustryClass) 
 CREATE TABLE Role (
        _id         int PRIMARY KEY DEFAULT nextval('seq'),
        classCode  roleClass NOT NULL,
-       _player     int NOT NULL, -- references entity(id)
-       _scoper     int,          -- references entity(id)
+       code        text,      
+       _player     int , -- references entity(id) XXX can be null (according to hl7) in order to express the generic role of researcher!!
+       _scoper     int,          -- references entity(id) XXX can be null 
        effectiveTime tsrange,
-       confidentialityCode Confidentiality
+       confidentialityCode Confidentiality,
+       _pgname     text
        );
 -- why double id 
 CREATE TABLE Patient (_id int PRIMARY KEY, veryImportantPersonCode PatientImportance) INHERITS (Role);
-CREATE TABLE Employee (jobCode EmployeeJobClass, pgname text) INHERITS (role);
-CREATE TABLE AssignedEntity () INHERITS (Employee);
+CREATE TABLE Employee () INHERITS (Role); -- classcode will be 'emp', code will be 'ft' or 'pt'
+CREATE TABLE AssignedEntity () INHERITS (Role); -- classcode will be 'assigned', code will be medical doctor 'md' or registered nurse 'rn' 
 
 CREATE TABLE Act (
        _id                  int PRIMARY KEY DEFAULT nextval('seq'),
@@ -121,6 +143,8 @@ CREATE TABLE Act (
        code                text,
        effectiveTime       tsrange,
        confidentialityCode Confidentiality,
+       statusCode          ActStatus,
+       negationInd         boolean,
        _clinical_segment    text[]
        );
 
@@ -135,3 +159,43 @@ CREATE TABLE Participation (
        typeCode participationType,
        effectiveTime       tsrange
        );
+
+CREATE TABLE ActRelationship (
+       _id                  int PRIMARY KEY DEFAULT nextval('seq'),
+       _act_source          int NOT NULL,
+       _act_target          int NOT NULL,
+       typeCode             ActRelationshipType
+       );
+
+
+\echo ====== ENTITY HIERARCHY ========
+SELECT * FROM entity;
+
+\echo ORGANIZATION
+SELECT * FROM organization;
+
+\echo PERSON
+SELECT * FROM person;
+
+\echo ======= ROLE HIERARCHY ========
+SELECT * FROM role;
+
+\echo PATIENT
+SELECT * FROM patient;
+
+\echo EMPLOYEE
+SELECT * FROM employee;
+
+\echo ======= ACT HIERARCHY ========
+SELECT * FROM act;
+
+\echo OBSERVATION
+SELECT * FROM observation;
+
+\echo care_provision
+SELECT * FROM CareProvision;
+
+\echo ======= PARTICIPATION =======
+SELECT * FROM participation;
+
+\quit
