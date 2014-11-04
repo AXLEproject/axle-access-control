@@ -1,3 +1,5 @@
+-- Copyright (c) 2013, Portavita BV Netherlands
+--
 -- MINI HL7 RIM for purpose of review row level security --
 -- no healthcare datatypes
 -- very limited amount of classes

@@ -1,3 +1,5 @@
+-- Copyright (c) 2014, Portavita BV Netherlands
+
 \echo ====== ENTITY HIERARCHY ========
 SELECT * FROM entity;
 

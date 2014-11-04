@@ -1,3 +1,5 @@
+-- Copyright (c) 2014, Portavita BV Netherlands
+
 DROP ROLE IF EXISTS bob;
 DROP ROLE IF EXISTS sigmund;
 DROP ROLE IF EXISTS ronan;

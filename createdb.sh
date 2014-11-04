@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright (c) 2014, Portavita BV Netherlands
+
 set -e
 
 usage() {

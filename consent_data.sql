@@ -1,3 +1,5 @@
+-- Copyright (c) 2014, Portavita BV Netherlands
+
 -------------------->>> PATIENT CONSENT 
 /* Mary White releases a consent through Dr. Pete.  (NB: code refers to 'Privacy Policy Acknoledgement Document' in LOINC) */
 EXECUTE 'INSERT INTO ActConsent (classcode, moodcode, code, effectiveTime, confidentialityCode, statusCode, _clinical_segment) VALUES (''cons'', ''evn'', ''57016-8 '', ''[20120909,20120909]'', ''r'', ''completed'', ''{diabetes}'') RETURNING _id' INTO act_consent;

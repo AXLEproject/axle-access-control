@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# Copyright (c) 2013, Portavita BV Netherlands
+#
 # Use this script to set PostgreSQL environment variables.
 # To prevent accidents this scripts modifies the current prompt
 # so it displays the active database.
