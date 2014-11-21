@@ -24,8 +24,14 @@ SELECT * FROM act;
 \echo OBSERVATION
 SELECT * FROM observation;
 
-\echo care_provision
+\echo =======CareProvision=======
 SELECT * FROM CareProvision;
 
 \echo ======= PARTICIPATION =======
 SELECT * FROM participation;
+
+\echo =======OPTOUTCONSENT ========
+SELECT * FROM optoutconsent;
+
+\echo =======ACTRELATIONship========
+SELECT * FROM ActRelationship;

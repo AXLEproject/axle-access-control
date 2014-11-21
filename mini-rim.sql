@@ -34,7 +34,6 @@ CREATE TYPE OrganizationIndustryClass AS ENUM (
        'omhs'  -- offices of mental health specialists
 );
 
--- http://www.hl7.org/documentcenter/public_temp_E5E731D0-1C23-BA17-0CD938440CF24081/standards/vocabulary/vocabulary_tables/infrastructure/vocabulary/vs_RoleClass.html#RoleClassRoot
 CREATE TYPE RoleClass AS ENUM (
        'pat',          -- person
        'emp',          -- employee 
@@ -45,12 +44,10 @@ CREATE TYPE RoleClass AS ENUM (
 
 );
 
--- codesys: HL7v3RoleCode, Oid: 2.16.840.1.113883.5.111 (basically specialization of roleclass, Code Set: Healthcare Provider Role Type )
 CREATE TYPE RoleCode AS ENUM ( 
        'md',     -- medical doctor
        'rn'     -- registered nurse
 );
-
 
 CREATE TYPE PatientImportance AS ENUM (
        'bm',     -- board member
@@ -75,8 +72,6 @@ CREATE TYPE ActMood AS ENUM (
        'apt'     -- appointment
 );
 
-
--- EmployeeJobClass  [2.16.840.1.113883.5.1059]
 CREATE TYPE EmployeeJobClass AS ENUM ( 
        'ft',     -- Full-time
        'pt'      -- part-time
@@ -134,10 +129,11 @@ CREATE TABLE Role (
        confidentialityCode Confidentiality,
        _pgname     text
        );
--- why double id 
+
 CREATE TABLE Patient (_id int PRIMARY KEY, veryImportantPersonCode PatientImportance) INHERITS (Role);
-CREATE TABLE Employee () INHERITS (Role); -- classcode will be 'emp', code will be 'ft' or 'pt'
-CREATE TABLE AssignedEntity () INHERITS (Role); -- classcode will be 'assigned', code will be medical doctor 'md' or registered nurse 'rn' 
+
+CREATE TABLE Employee () INHERITS (Role); -- classcode='emp', code='ft' or 'pt'
+CREATE TABLE AssignedEntity () INHERITS (Role); -- classcode='assigned', code= 'md' or 'rn' 
 
 CREATE TABLE Act (
        _id                  int PRIMARY KEY DEFAULT nextval('seq'),
